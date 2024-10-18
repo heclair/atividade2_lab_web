@@ -6,7 +6,7 @@ const router = Router();
 
 // Rota para criar uma nova lista de tarefas
 //router.post("/", SubSubTarefaController.create);
-router.post("/", SubSubTarefaController.update);
+router.post("/subsubtarefa", SubSubTarefaController.update);
 
 
 export default router;
