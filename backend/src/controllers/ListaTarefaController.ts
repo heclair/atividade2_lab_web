@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { ListaTarefa } from "../models";
+import mongoose from "mongoose";
+import moment from "moment";
 
 
 class ListaTarefaController {
@@ -9,7 +11,12 @@ class ListaTarefaController {
     const { tarefas, nomeLista, userId } = req.body; // Ajuste os campos conforme sua estrutura
 
     try {
-      const response = await ListaTarefa.create({ tarefas, nomeLista, userId });
+
+      const dataCriacao = moment().format("YYYY-MM-DD");
+      
+      const response = await ListaTarefa.create({ tarefas, nomeLista, userId, dataCriacao });
+
+      
       
       res.status(201).json(response); // Código 201 para criação
     } catch (e: any) {
@@ -21,6 +28,57 @@ class ListaTarefaController {
       }
     }
   }
+
+  public async listAll(req: Request, res: Response): Promise<void> {
+    try {
+        const listas = await ListaTarefa.find().populate("userId");
+        res.status(200).json(listas);
+    } catch (e: any) {
+        console.error(e);
+        res.status(500).json({ message: "Erro ao buscar listas de tarefas." });
+    }
+}
+
+public async list(req: Request, res: Response): Promise<void> {
+  const { userId, startDate, endDate } = req.query; // Recebe os parâmetros via query
+
+  try {
+      // Constrói as condições de filtro para a agregação
+      const matchConditions: any = { userId: new mongoose.Types.ObjectId(userId as string) };
+
+      // Adiciona filtro de data de criação, se fornecido
+      if (startDate || endDate) {
+          matchConditions['dataCriacao'] = {};
+          if (startDate) {
+              matchConditions['dataCriacao'].$gte = new Date(startDate as string);
+          }
+          if (endDate) {
+              matchConditions['dataCriacao'].$lte = new Date(endDate as string);
+          }
+      }
+
+      // Consulta usando agregação para aplicar os filtros e projeções desejados
+      const listas = await ListaTarefa.aggregate([
+          { $match: matchConditions }, // Aplica o filtro de userId e dataCriacao (se fornecido)
+          {
+              $project: {
+                  _id: 1, // Inclui o ID da lista
+                  nomeLista: 1, // Inclui o nome da lista
+                  tarefaCount: { $size: "$tarefas" } // Conta o número de tarefas
+              }
+          }
+      ]);
+
+      res.status(200).json(listas);
+  } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ message: "Erro ao buscar listas de tarefas." });
+  }
+}
+
+
+
+
 
 }
 

@@ -22,6 +22,7 @@ interface ISubSubTarefa {
 interface IListaTarefa extends Document {
     userId: mongoose.Types.ObjectId; // Referência ao usuário
     nomeLista: string;
+    dataCriacao: Date;
     tarefas: ISubTarefa[]; // Array de subtarefas
 }
 
@@ -37,7 +38,15 @@ const ListaTarefaSchema: Schema<IListaTarefa> = new Schema({
         maxlength: [100, "O nome da lista deve ter no máximo 100 caracteres"],
         trim: true
     },
+    dataCriacao:{
+        type: Date,
+    },
     tarefas: [{
+        listaid: {
+            type: mongoose.Types.ObjectId,
+            ref: "Lista",
+            required: true
+        },
         nomeTarefa: { type: String, required: [true, "O nome da tarefa é obrigatório"], maxlength: 100 },
         descricao: { type: String, maxlength: 500, trim: true },
         dataCriacao: { type: Date},
@@ -45,6 +54,11 @@ const ListaTarefaSchema: Schema<IListaTarefa> = new Schema({
         prioridade: { type: String },
         status: { type: String},
         tarefas: [{
+            tarefaId: {
+                type: mongoose.Types.ObjectId,
+                ref: "tarefas",
+                required: true
+            },
 
             nomeTarefa: { type: String, required: [true, "O nome da tarefa é obrigatório"], maxlength: 100 },
             descricao: { type: String, maxlength: 500, trim: true },

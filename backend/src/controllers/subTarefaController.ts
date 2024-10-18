@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { SubTarefa, ListaTarefa } from "../models"; // Certifique-se de importar o modelo ListaTarefa
+
 import moment from "moment";
+import { ListaTarefa } from "../models";
 
 class SubTarefaController {
     public async update(req: Request, res: Response): Promise<void> {

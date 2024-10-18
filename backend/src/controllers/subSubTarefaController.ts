@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ListaTarefa } from "../models"; // Certifique-se de importar o modelo ListaTarefa
 import moment from "moment";
+import mongoose from "mongoose";
 
 class SubSubTarefaController {
     public async update(req: Request, res: Response): Promise<void> {
@@ -30,17 +31,25 @@ class SubSubTarefaController {
         };
 
         try {
+            // Convertendo listaid para ObjectId
+            const listaIdObject = new mongoose.Types.ObjectId(listaid);
+            
+            // Log para verificar os IDs
+            console.log('Lista ID:', listaIdObject);
+            console.log('Tarefa ID:', tarefaId);
+
             // Atualizar a ListaTarefa, adicionando a nova sub-subtarefa ao array de tarefas da subtarefa correspondente
-            const result = await ListaTarefa.updateOne(
-                { _id: listaid, "tarefas._id": tarefaId }, // Filtra pela lista e pela subtarefa
-                { $push: { "tarefas.$.tarefas": novaSubSubTarefa } } // Adiciona ao array de tarefas da subtarefa
+            const result = await ListaTarefa.findOneAndUpdate(
+                { _id: listaIdObject, "tarefas._id": tarefaId },
+                { $push: { "tarefas.$.tarefas": novaSubSubTarefa } },
+                { new: true } // Retorna o documento atualizado
             );
 
             // Log para verificar o resultado da operação
             console.log('Resultado da atualização:', result);
 
-            if (result.modifiedCount === 0) {
-                res.status(404).json({ message: "Subtarefa não encontrada ou não modificada." });
+            if (!result) {
+                 res.status(404).json({ message: "Subtarefa não encontrada ou não modificada." });
             }
 
             // Resposta com a nova sub-subtarefa
