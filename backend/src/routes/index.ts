@@ -7,8 +7,8 @@ import SubSubTarefa  from "./SubTarefa";
 const router = Router();
 
 router.use("/user", user);
-router.use("/lista", listaTarefa)
-router.use("/subtarefa", SubTarefa)
-router.use("/subsubtarefa", SubSubTarefa)
+router.use("/", listaTarefa)
+router.use("/", SubTarefa)
+router.use("/", SubSubTarefa)
 
 export default router;
